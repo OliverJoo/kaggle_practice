@@ -110,32 +110,38 @@ Y_train = X_train_df['Survived']
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import mean_absolute_error
 import lightgbm as lgb
 
+validation_titanic_df = pd.read_csv('./Data/gender_submission.csv')
 # create DecisionTree, RandomForest, LogisticRegression Classifier
 dt_clf = DecisionTreeClassifier(random_state=20)
-rf_clf = RandomForestClassifier(random_state=20, n_estimators=300)
-lr_clf = LogisticRegression(solver='liblinear', penalty='l2', max_iter=200)
+rf_clf = RandomForestClassifier(random_state=20, n_estimators=300, max_depth=23)
+lr_clf = LogisticRegression(solver='liblinear', warm_start=True, tol=0.01, random_state=20)
 lgb_clf = lgb.LGBMClassifier(random_state=20, n_estimators=300)
 
 # DecisionTreeClassifier learn/predict/evaluation
 dt_clf.fit(X_train, Y_train)
 dt_pred = dt_clf.predict(X_test)
 print(f'DecisionTreeClassifier score: {dt_clf.score(X_train, Y_train):.4f}')  # \n{dt_pred}')
+print(f'DecisionTreeClassifier MAE : {mean_absolute_error(validation_titanic_df["Survived"], dt_pred)}')
 
 # RandomForestClassifier learn/predict/evaluation
 rf_clf.fit(X_train, Y_train)
 rf_pred = rf_clf.predict(X_test)
 print(f'RandomForestClassifier score: {rf_clf.score(X_train, Y_train):.4f}')  # \n{rf_pred}')
+print(f'RandomForestClassifier MAE : {mean_absolute_error(validation_titanic_df["Survived"], rf_pred)}')
 
 # LogisticRegression learn/predict/evaluation
 lr_clf.fit(X_train, Y_train)
 lr_pred = lr_clf.predict(X_test)
 print(f'LogisticRegression score: {lr_clf.score(X_train, Y_train):.4f}')  # \n{lr_pred}')
+print(f'LogisticRegression MAE : {mean_absolute_error(validation_titanic_df["Survived"], lr_pred)}')
 
 lgb_clf.fit(X_train, Y_train)
 lgb_pred = lgb_clf.predict(X_test)
 print(f'LGBMClassifier score: {lgb_clf.score(X_train, Y_train):.4f}')  # \n{lr_pred}')
+print(f'LGBMClassifier MAE : {mean_absolute_error(validation_titanic_df["Survived"], lgb_pred)}')
 
 # submission = pd.DataFrame({"PassengerId": pd.read_csv('./Data/test.csv')["PassengerId"], "Survived": rf_pred})
 # submission.to_csv('submission.csv', index=False)
