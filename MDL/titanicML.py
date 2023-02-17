@@ -124,24 +124,25 @@ lgb_clf = lgb.LGBMClassifier(random_state=20, n_estimators=300)
 dt_clf.fit(X_train, Y_train)
 dt_pred = dt_clf.predict(X_test)
 print(f'DecisionTreeClassifier score: {dt_clf.score(X_train, Y_train):.4f}')  # \n{dt_pred}')
-print(f'DecisionTreeClassifier MAE : {mean_absolute_error(validation_titanic_df["Survived"], dt_pred)}')
+# print(f'DecisionTreeClassifier MAE : {mean_absolute_error(validation_titanic_df["Survived"], dt_pred):.4f}')
 
 # RandomForestClassifier learn/predict/evaluation
 rf_clf.fit(X_train, Y_train)
 rf_pred = rf_clf.predict(X_test)
 print(f'RandomForestClassifier score: {rf_clf.score(X_train, Y_train):.4f}')  # \n{rf_pred}')
-print(f'RandomForestClassifier MAE : {mean_absolute_error(validation_titanic_df["Survived"], rf_pred)}')
+# print(f'RandomForestClassifier MAE : {mean_absolute_error(validation_titanic_df["Survived"], rf_pred):.4f}')
 
 # LogisticRegression learn/predict/evaluation
 lr_clf.fit(X_train, Y_train)
 lr_pred = lr_clf.predict(X_test)
 print(f'LogisticRegression score: {lr_clf.score(X_train, Y_train):.4f}')  # \n{lr_pred}')
-print(f'LogisticRegression MAE : {mean_absolute_error(validation_titanic_df["Survived"], lr_pred)}')
+# print(f'LogisticRegression MAE : {mean_absolute_error(validation_titanic_df["Survived"], lr_pred):.4f}')
 
+# LGBMClassifier learn/predict/evaluation
 lgb_clf.fit(X_train, Y_train)
 lgb_pred = lgb_clf.predict(X_test)
 print(f'LGBMClassifier score: {lgb_clf.score(X_train, Y_train):.4f}')  # \n{lr_pred}')
-print(f'LGBMClassifier MAE : {mean_absolute_error(validation_titanic_df["Survived"], lgb_pred)}')
+# print(f'LGBMClassifier MAE : {mean_absolute_error(validation_titanic_df["Survived"], lgb_pred):.4f}')
 
 # submission = pd.DataFrame({"PassengerId": pd.read_csv('./Data/test.csv')["PassengerId"], "Survived": rf_pred})
 # submission.to_csv('submission.csv', index=False)
