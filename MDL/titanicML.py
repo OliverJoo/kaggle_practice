@@ -3,6 +3,7 @@ import pandas
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
 
 # to see all data
 pd.set_option('display.max_columns', None)
@@ -18,6 +19,7 @@ titanic_df = pd.read_csv('./Data/train.csv')
 
 def prepare_df_chk(df: pandas.DataFrame):
     df['Age'].fillna(df['Age'].mean(), inplace=True)
+
     df['Cabin'].fillna('N', inplace=True)
     df['Embarked'].fillna('N', inplace=True)
     df['Cabin'] = df['Cabin'].str[:1]
@@ -60,8 +62,6 @@ titanic_df['Age_cat'] = titanic_df['Age'].apply(lambda x: get_category(x))
 sns.barplot(x='Age_cat', y='Survived', hue='Sex', data=titanic_df, order=group_names)
 titanic_df.drop('Age_cat', axis=1, inplace=True)
 
-from sklearn.preprocessing import LabelEncoder
-
 
 # Filling Null Parameters
 def fillna(df):
@@ -97,6 +97,13 @@ def transform_features(df):
     return df
 
 
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import mean_absolute_error
+import lightgbm as lgb
+
 # reloading original dataset to get feature and label dataset separately
 titanic_df = pd.read_csv('./Data/train.csv')
 test_titanic_df = pd.read_csv('./Data/test.csv')
@@ -107,18 +114,18 @@ X_test = transform_features(test_titanic_df)
 X_train = X_train_df.drop('Survived', axis=1)
 Y_train = X_train_df['Survived']
 
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import mean_absolute_error
-import lightgbm as lgb
-
 validation_titanic_df = pd.read_csv('./Data/gender_submission.csv')
 # create DecisionTree, RandomForest, LogisticRegression Classifier
 dt_clf = DecisionTreeClassifier(random_state=20)
 rf_clf = RandomForestClassifier(random_state=20, n_estimators=300, max_depth=23)
 lr_clf = LogisticRegression(solver='liblinear', warm_start=True, tol=0.01, random_state=20)
 lgb_clf = lgb.LGBMClassifier(random_state=20, n_estimators=300)
+
+# LogisticRegression learn/predict/evaluation
+lr_clf.fit(X_train, Y_train)
+lr_pred = lr_clf.predict(X_test)
+print(f'LogisticRegression score: {lr_clf.score(X_train, Y_train):.4f}')  # \n{lr_pred}')
+# print(f'LogisticRegression MAE : {mean_absolute_error(validation_titanic_df["Survived"], lr_pred):.4f}')
 
 # DecisionTreeClassifier learn/predict/evaluation
 dt_clf.fit(X_train, Y_train)
@@ -131,12 +138,6 @@ rf_clf.fit(X_train, Y_train)
 rf_pred = rf_clf.predict(X_test)
 print(f'RandomForestClassifier score: {rf_clf.score(X_train, Y_train):.4f}')  # \n{rf_pred}')
 # print(f'RandomForestClassifier MAE : {mean_absolute_error(validation_titanic_df["Survived"], rf_pred):.4f}')
-
-# LogisticRegression learn/predict/evaluation
-lr_clf.fit(X_train, Y_train)
-lr_pred = lr_clf.predict(X_test)
-print(f'LogisticRegression score: {lr_clf.score(X_train, Y_train):.4f}')  # \n{lr_pred}')
-# print(f'LogisticRegression MAE : {mean_absolute_error(validation_titanic_df["Survived"], lr_pred):.4f}')
 
 # LGBMClassifier learn/predict/evaluation
 lgb_clf.fit(X_train, Y_train)
