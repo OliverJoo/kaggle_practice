@@ -12,17 +12,23 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.ensemble import RandomForestRegressor
 import pandas as pd
 from sklearn.model_selection import cross_val_score
+import ydata_profiling
 
 # read dataset
-titanic_df = pd.read_csv('./Data/train.csv')  #  to train
+titanic_df = pd.read_csv('./Data/train.csv')  # to train
 X_test = pd.read_csv('./Data/test.csv')  # to test
 y_test = pd.read_csv('./Data/gender_submission.csv')  # to validation
 X_train = titanic_df.drop('Survived', axis=1)
 y_train = titanic_df['Survived']
 
+# check the dataset profile report first
+ydata_profiling.ProfileReport(titanic_df).to_file('./titanic_df_profile_report.html')
+
 # define Pipeline for numeric transformer for imputation
-number_tranformer_median = Pipeline(steps=[('imputer_median', SimpleImputer(strategy='median')), ('scaler', StandardScaler())])
-number_tranformer_constant = Pipeline(steps=[('imputer_constant', SimpleImputer(strategy='constant', fill_value=0)), ('scaler', StandardScaler())])
+number_tranformer_median = Pipeline(
+    steps=[('imputer_median', SimpleImputer(strategy='median')), ('scaler', StandardScaler())])
+number_tranformer_constant = Pipeline(
+    steps=[('imputer_constant', SimpleImputer(strategy='constant', fill_value=0)), ('scaler', StandardScaler())])
 
 # define Piple for categorical transformer by OneHoeEncoder and OridnalEncoder
 categorical_tranformer = OneHotEncoder(handle_unknown='ignore', sparse=False)
@@ -34,25 +40,31 @@ preprocessor = ColumnTransformer(transformers=[('numb_median', number_tranformer
                                                ('drop_out', 'drop', ['PassengerId', 'Name', 'Ticket']),
                                                ('category', categorical_tranformer, ['Embarked', 'Sex', 'Pclass'])])
 
-# set MDLing Pipleline
-lr_clf = Pipeline(steps=[('prepro', preprocessor), ('classifier', LogisticRegression(solver='liblinear', warm_start=True, tol=0.01, random_state=20))])
+# set Pipleline for each MDL
+lr_clf = Pipeline(steps=[('prepro', preprocessor), (
+'classifier', LogisticRegression(solver='liblinear', warm_start=True, tol=0.01, random_state=20))])
 dt_clf = Pipeline(steps=[('prepro', preprocessor), ('classifier', DecisionTreeClassifier(random_state=20))])
-rf_clf = Pipeline(steps=[('prepro', preprocessor), ('classifier', RandomForestClassifier(random_state=20, n_estimators=300, max_depth=23))])
-lgb_clf = Pipeline(steps=[('prepro', preprocessor), ('classifier', lgb.LGBMClassifier(random_state=20, n_estimators=300))])
+rf_clf = Pipeline(steps=[('prepro', preprocessor),
+                         ('classifier', RandomForestClassifier(random_state=20, n_estimators=300, max_depth=23))])
+lgb_clf = Pipeline(
+    steps=[('prepro', preprocessor), ('classifier', lgb.LGBMClassifier(random_state=20, n_estimators=300))])
+
 
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.2, random_state=20)
 
 
 def get_score(n_estimators):
     """
-    temp test function: get cross-validation MAE score(not for titanicML, this will be removed)
+    temp test function: get cross-validation by negative MAE score(not for titanicML, this will be removed)
     :param n_estimators:
     :return: mean of 5 cross validation scores
     """
-    my_pipeline = Pipeline(steps=[('preprocessor', preprocessor), ('classifier', RandomForestRegressor(random_state=20, n_estimators=n_estimators))])
+    my_pipeline = Pipeline(steps=[('preprocessor', preprocessor),
+                                  ('classifier', RandomForestRegressor(random_state=20, n_estimators=n_estimators))])
     scores = -1 * cross_val_score(my_pipeline, X_train, y_train, cv=5, scoring='neg_mean_absolute_error')
 
     return scores.mean()
+
 
 # scores = {}
 # for i in range(1, 10):
